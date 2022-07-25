@@ -1,6 +1,8 @@
 [package]
-name = "shell"
-version = "0.1.0"
+name = "clara-shell"
+version = "0.1.1"
+description = "a shell built for my gnu utils repo and a small rust os"
+license = "GPL-3.0-only"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -8,3 +10,4 @@ edition = "2021"
 [dependencies]
 logos = "0.12.1"
 subst = "0.1.2"
+serial_test = "0.8.0"

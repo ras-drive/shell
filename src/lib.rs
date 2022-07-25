@@ -1,44 +1,37 @@
-mod parser;
-mod token;
+pub mod token;
+pub mod parser;
 
-use std::env;
+use std::{env, fs};
 use std::error::Error;
 use std::fs::read_to_string;
 use std::io::{stdin, stdout, Write};
 use std::path::Path;
 use std::process::{Child, Command, Stdio};
-
 use logos::{Logos, Lexer};
 use subst::substitute;
-use crate::lib::parser::Parser;
-use crate::lib::token::Token;
+use crate::parser::Parser;
+use crate::token::Token;
 
 
-pub fn setup(config_name: &str) -> Result<(), Box<dyn Error>> {
-    match read_to_string(config_name) {
-        Ok(data) => {
-            let lex: Lexer<Token> = Token::lexer(data.as_str());
-            let mut token_list = vec![];
-
-            for i in lex {
-                if i != Token::Error {
-                    token_list.push(i);
+/// Main run function with an optional config file
+/// string slice you can specify
+pub fn run(config_file: Option<&str>) {
+    match config_file {
+        None => {
+            match fs::read("../../.clararc") {
+                Ok(_) => {
+                    setup(".clararc").unwrap()
+                }
+                Err(_) => {
+                    fs::write("../../.clararc", "").unwrap();
                 }
             }
-
-
-            let mut parser = Parser::new(token_list);
-            parser.run().expect("TODO: Error message");
-
-            Ok(())
         }
-        Err(_) => {
-            Err(Box::from("Error: config file not found"))
+        Some(file) => {
+            setup(file).unwrap();
         }
     }
-}
 
-pub fn run() {
     loop {
         print!("> ");
         stdout().flush().expect("Error while pushing to stdout");
@@ -134,18 +127,50 @@ pub fn run() {
     }
 }
 
+
+fn setup(config_name: &str) -> Result<(), Box<dyn Error>> {
+    match read_to_string(config_name) {
+        Ok(data) => {
+            let lex: Lexer<Token> = Token::lexer(data.as_str());
+            let mut token_list = vec![];
+
+            for i in lex {
+                if i != Token::Error {
+                    token_list.push(i);
+                }
+            }
+
+
+            let mut parser = Parser::new(token_list);
+            parser.run().expect("TODO: Error message");
+
+            Ok(())
+        }
+        Err(_) => {
+            Err(Box::from("Error: config file not found"))
+        }
+    }
+}
+
+
 #[cfg(test)]
 mod tests {
-    use std::fs::{File, remove_file};
-    use std::io::Write;
+    use serial_test::serial;
+    use std::fs::{remove_file, write};
     use super::*;
+    #[serial(".clararc_temp")]
     #[test]
-    fn test_simple_script() {
-        let content = String::from("export TEST=\"test\"");
-        let mut file = File::create(".shellrc_temp").unwrap();
-        file.write(content.as_bytes()).expect("error writing test .shellrc config");
-        setup(".shellrc_temp").unwrap();
+    fn test_empty_config() {
+        write(".clararc_temp", "").unwrap();
+        setup(".clararc_temp").unwrap();
+        remove_file(".clararc_temp").unwrap();
+    }
 
-        remove_file(".shellrc_temp").unwrap();
+    #[serial(".clararc_temp")]
+    #[test]
+    fn test_simple_config() {
+        write(".clararc_temp", "export TEST=\"test\"").unwrap();
+        setup(".clararc_temp").unwrap();
+        remove_file(".clararc_temp").unwrap();
     }
 }

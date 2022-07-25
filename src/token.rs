@@ -1,5 +1,5 @@
 use std::fmt::{Debug, Formatter, Result, Display};
-use logos::Logos;
+use logos::{Logos};
 
 #[derive(Logos, Debug, PartialEq)]
 pub enum Token<'a> {
