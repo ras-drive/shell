@@ -1,5 +1,5 @@
 use std::error::Error;
-use crate::token::Token;
+use crate::lib::token::Token;
 
 pub struct Parser<'a> {
     data: Vec<Token<'a>>

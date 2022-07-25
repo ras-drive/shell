@@ -9,8 +9,8 @@ use std::path::Path;
 use std::process::{Child, Command, Stdio};
 use logos::{Logos, Lexer};
 use subst::substitute;
-use crate::parser::Parser;
-use crate::token::Token;
+use crate::lib::parser::Parser;
+use crate::lib::token::Token;
 
 
 /// Main run function with an optional config file
